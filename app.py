@@ -83,7 +83,12 @@ Türkçe yanıt ver.
 # ── Anthropic istemcisi ──────────────────────────────────────
 @st.cache_resource
 def get_client():
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # ESKİ
+api_key = os.getenv("ANTHROPIC_API_KEY")
+
+# YENİ — ikisini de dene, hangisi varsa onu al
+api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+
     if not api_key:
         st.error("⚠️ ANTHROPIC_API_KEY bulunamadı! .env dosyasını kontrol et.")
         st.stop()
