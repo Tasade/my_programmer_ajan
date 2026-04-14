@@ -82,17 +82,20 @@ Türkçe yanıt ver.
 
 # ── Anthropic istemcisi ──────────────────────────────────────
 @st.cache_resource
+# ESKİ (hatalı)
+@st.cache_resource
 def get_client():
 
-# YENİ — ikisini de dene, hangisi varsa onu al
 api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
 
+# YENİ (doğru)
+@st.cache_resource
+def get_client():
+    api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
-        st.error("⚠️ ANTHROPIC_API_KEY bulunamadı! .env dosyasını kontrol et.")
+        st.error("⚠️ ANTHROPIC_API_KEY bulunamadı!")
         st.stop()
     return anthropic.Anthropic(api_key=api_key)
-
-client = get_client()
 
 # ── Başlık ───────────────────────────────────────────────────
 st.title("💻 Kod Koçu")
