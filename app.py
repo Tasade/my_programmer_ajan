@@ -83,8 +83,6 @@ Türkçe yanıt ver.
 # ── Anthropic istemcisi ──────────────────────────────────────
 @st.cache_resource
 def get_client():
-    # ESKİ
-api_key = os.getenv("ANTHROPIC_API_KEY")
 
 # YENİ — ikisini de dene, hangisi varsa onu al
 api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
