@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Sayfa ayarları ──────────────────────────────────────────
 st.set_page_config(
     page_title="Kod Koçu 🤖",
     page_icon="💻",
@@ -16,93 +15,74 @@ st.markdown("""
 <style>
     .stChatMessage { border-radius: 12px; }
     .stChatInputContainer { border-radius: 12px; }
-    .main { background-color: #0f0f1a; }
-    h1 { color: #a78bfa; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Sistem Promptu ───────────────────────────────────────────
 SYSTEM_PROMPT = """
 Sen "Kod Koçu" adında bir kodlama eğitim asistanısın.
 Görevin lise veya üniversite düzeyindeki öğrencilere
 kodlamayı öğretmek — ama kodu doğrudan vermek değil,
 birlikte keşfettirmek.
 
-## 🎯 Pedagojik Yaklaşımın
+## Pedagojik Yaklaşımın
 
-### 1. Algoritmik Önce İlkesi
-Öğrenci bir kod veya proje istediğinde ASLA direkt kod yazma.
-Şu sırayı izle:
-  Adım 1 → Problemi anlamlandır
-  Adım 2 → Algoritmayı keşfettir (adım adım ne olacak?)
-  Adım 3 → Pseudocode yaz (Türkçe mantık akışı)
-  Adım 4 → Kütüphane/araç öner (neden bu kütüphane?)
-  Adım 5 → Birlikte kodla (her adımda soru sor)
-  Adım 6 → Test et ve yorumla
+1. Algoritmik Önce İlkesi: Öğrenci kod istediğinde ASLA
+direkt kod yazma. Şu sırayı izle:
+  - Problemi anlamlandır
+  - Algoritmayı keşfettir
+  - Pseudocode yaz
+  - Kütüphane öner
+  - Birlikte kodla
+  - Test et ve yorumla
 
-### 2. Soru Sorma Tekniğin (Sokratik Yöntem)
-Her adımda şu kalıpları kullan:
-- "Sence bu veriyi önce temizlemeli miyiz, yoksa direkt analiz etsek ne olur?"
-- "İki yol var: ... veya ... Hangisi daha mantıklı sence?"
-- "Bu satır ne yapıyor olabilir, bir tahmin et bakalım?"
-- "Çalıştır ve ne çıktığına bak — ne bekliyordun?"
+2. Sokratik Yöntem ile soru sor:
+  - "İki yol var: A mı B mi, hangisi daha mantıklı sence?"
+  - "Bu satır ne yapıyor olabilir, tahmin et bakalım?"
+  - "Çalıştır ve ne çıktığına bak, ne bekliyordun?"
 
-### 3. Onaylayıcı ve Motive Edici Dil
-- Yanlış cevaplarda: "Neredeyse! Şunu düşün: ..."
-- Doğru cevaplarda: "Kesinlikle! Bunu fark etmen çok önemli 🎉"
-- Takıldığında: "Tamam dur, beraber bakalım. Hiç sorun değil."
-- Asla: "Yanlış", "Hayır", "Hatalı" gibi kırıcı ifadeler kullanma
+3. Onaylayıcı dil kullan:
+  - Yanlışta: "Neredeyse! Şunu düşün..."
+  - Doğruda: "Kesinlikle! Bunu fark etmen harika 🎉"
+  - Takılınca: "Beraber bakalım, hiç sorun değil."
+  - Asla "Yanlış" veya "Hatalı" deme.
 
-### 4. Dil ve Ton
-- Sade, samimi, arkadaş gibi konuş
-- Teknik terimleri ilk kullanımda mutlaka açıkla
-- Emoji kullan ama abartma 🙂
-- Öğrenciyi aktif tut, monolog yapma
-- Yanıtlar kısa ve öz olsun — uzun duvar gibi metin yazma
+4. Konu dışı sorularda empati göster, yönlendir:
+  "Anladım 😊 Ama küçük bir Python projesi harika bir
+  stres atma yöntemi! Ne dersin, deneyelim mi?"
 
-### 5. Konu Dışı Sorular
-Eğer soru kodlama ile ilgili değilse empati göster, 
-motive ederek yönlendir:
-"Anladım, kafan biraz dağınık 😊 Ama bak, küçük bir 
-Python projesi yazmak aslında harika bir stres atma 
-yöntemi! Ne dersin, 5 dakikada basit bir şey yazalım mı?"
+Desteklediğin konular: Python, veri analizi, pandas,
+numpy, matplotlib, streamlit, web scraping, pygame,
+Flask, algoritmalar.
 
-## 📚 Desteklediğin Konular
-- Python temelleri
-- Veri analizi (pandas, numpy)
-- Görselleştirme (matplotlib, seaborn, streamlit)
-- Web scraping (requests, BeautifulSoup)
-- Oyun geliştirme (pygame temelleri)
-- Web sitesi (Flask, Streamlit)
-- Temel algoritmalar ve veri yapıları
-
-Konu dışındaki her şeyde nazikçe yönlendir.
-Türkçe yanıt ver.
+Türkçe yanıt ver. Kısa ve öz ol. Samimi ve arkadaşça ol.
 """
 
-# ── Anthropic istemcisi ──────────────────────────────────────
-@st.cache_resource
-# ESKİ (hatalı)
-@st.cache_resource
-def get_client():
 
-api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+def get_api_key():
+    try:
+        key = st.secrets["ANTHROPIC_API_KEY"]
+        if key:
+            return key
+    except Exception:
+        pass
+    key = os.getenv("ANTHROPIC_API_KEY")
+    if key:
+        return key
+    return None
 
-# YENİ (doğru)
-@st.cache_resource
-def get_client():
-    api_key = st.secrets.get("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        st.error("⚠️ ANTHROPIC_API_KEY bulunamadı!")
-        st.stop()
-    return anthropic.Anthropic(api_key=api_key)
 
-# ── Başlık ───────────────────────────────────────────────────
+api_key = get_api_key()
+
+if not api_key:
+    st.error("⚠️ ANTHROPIC_API_KEY bulunamadı! Secrets veya .env dosyasını kontrol et.")
+    st.stop()
+
+client = anthropic.Anthropic(api_key=api_key)
+
 st.title("💻 Kod Koçu")
 st.caption("Kodlamayı birlikte öğreniyoruz — adım adım, soru soru 🚀")
 st.divider()
 
-# ── Oturum geçmişi ───────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
     st.session_state.messages.append({
@@ -116,24 +96,18 @@ if "messages" not in st.session_state:
         )
     })
 
-# ── Geçmiş mesajları göster ──────────────────────────────────
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# ── Kullanıcı girişi ─────────────────────────────────────────
 if girdi := st.chat_input("Bir şeyler sor veya proje fikri söyle..."):
 
-    # Kullanıcı mesajını ekle ve göster
     st.session_state.messages.append({"role": "user", "content": girdi})
     with st.chat_message("user"):
         st.markdown(girdi)
 
-    # Yanıt üret
     with st.chat_message("assistant"):
         with st.spinner("Düşünüyorum... 🤔"):
-
-            # LangChain yerine direkt Anthropic SDK kullan — daha sade
             yanit = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=1000,
@@ -143,37 +117,27 @@ if girdi := st.chat_input("Bir şeyler sor veya proje fikri söyle..."):
                     for m in st.session_state.messages
                 ]
             )
-
             cevap = yanit.content[0].text
             st.markdown(cevap)
 
-    # Yanıtı geçmişe ekle
     st.session_state.messages.append({
         "role": "assistant",
         "content": cevap
     })
 
-# ── Yan panel ────────────────────────────────────────────────
 with st.sidebar:
     st.header("📊 Oturum")
     st.metric("Mesaj Sayısı", len(st.session_state.messages))
-
     st.divider()
-
     st.markdown("**💡 Test Senaryoları:**")
     st.markdown("""
-    - Python ile veri analizi yap
-    - Taş kağıt makas oyunu yaz
-    - Arkadaşım bana kızmış 😅
-    - Web scraping nasıl yapılır?
+- Python ile veri analizi yap
+- Taş kağıt makas oyunu yaz
+- Arkadaşım bana kızmış 😅
+- Web scraping nasıl yapılır?
     """)
-
     st.divider()
-
     if st.button("🔄 Sohbeti Sıfırla", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
-
-    st.divider()
     st.caption("Pedagojik kodlama asistanı")
-    st.caption("claude-3-5-sonnet-20241022")
